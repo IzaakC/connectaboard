@@ -1,81 +1,47 @@
 import chess
 
 from connectaboard.board_parser import (
+    BLACK,
+    EMPTY,
+    WHITE,
     BoardParser,
-    SeenCounter,
-    Square,
     SquareChange,
-    SquareState,
-    _board2squares,
+    _board2raw,
 )
 
 
-def test_board2squares():
+def test_board2raw():
     board = chess.Board()
-    squares = _board2squares(board)
-    assert squares[chess.A1] == Square(SquareState.WHITE, chess.A1)
-    assert squares[chess.E4] == Square(SquareState.EMPTY, chess.E4)
-    assert squares[chess.H8] == Square(SquareState.BLACK, chess.H8)
-
-
-def test_square_from_piece():
-    board = chess.Board()
-    piece = board.piece_at(chess.E4)
-    square = Square.from_piece(piece, chess.E4)
-    assert square.state == SquareState.EMPTY
-
-    board.set_piece_at(chess.E4, chess.Piece(chess.PAWN, chess.WHITE))
-    piece = board.piece_at(chess.E4)
-    square = Square.from_piece(piece, chess.E4)
-    assert square.state == SquareState.WHITE
-
-    board.set_piece_at(chess.E4, chess.Piece(chess.PAWN, chess.BLACK))
-    piece = board.piece_at(chess.E4)
-    square = Square.from_piece(piece, chess.E4)
-    assert square.state == SquareState.BLACK
-
-
-def test_square_from_raw():
-    raw_state = SquareState.WHITE.value
-    square = Square.from_raw(raw_state, chess.E4)
-    assert square.state == SquareState.WHITE
+    raw = _board2raw(board)
+    assert raw[chess.A1] == WHITE
+    assert raw[chess.E4] == EMPTY
+    assert raw[chess.H8] == BLACK
 
 
 def test_square_change():
-    prev = Square(SquareState.WHITE, chess.E4)
-    new = Square(SquareState.BLACK, chess.E4)
-    change = SquareChange(prev, new)
-    assert change.prev == SquareState.WHITE
-    assert change.new == SquareState.BLACK
+    change = SquareChange(WHITE, BLACK, chess.E4)
+    assert change.prev == WHITE
+    assert change.new == BLACK
     assert change.square == chess.E4
 
 
 def test_board_parser_initial_state():
     board = chess.Board()
     parser = BoardParser(board)
-    squares = parser._previous_state
-    pieces = board.piece_map()
+    raw_state = parser._previous_state
+    expected_state = _board2raw(board)
 
-    assert len(squares) == 64
-    for square in squares:
-        piece = pieces.get(square.square)
-        if not piece:
-            assert square.state == SquareState.EMPTY
-        elif piece.color == chess.WHITE:
-            assert square.state == SquareState.WHITE
-        else:
-            assert square.state == SquareState.BLACK
+    assert raw_state == expected_state
+    assert len(raw_state) == 64
 
 
 def test_board_parser_parse_no_change():
     board = chess.Board()
     parser = BoardParser(board)
 
-    raw_board = tuple(square.state.value for square in parser._previous_state)
-    print(raw_board)
-    state = parser.parse(raw_board)
-
-    assert state.changed == ()
+    state = parser.parse(parser._previous_state)
+    assert state.board == parser._previous_state
+    assert state.changed == []
     assert state.move is None
 
 
@@ -85,16 +51,15 @@ def test_board_parser_parse_with_move():
 
     # Simulate a move: e2 to e4
     board.push(chess.Move.from_uci("e2e4"))
-    squares = _board2squares(board)
-    raw_board = tuple(square.state.value for square in squares)
-    state = parser.parse(raw_board)
+    new_raw = _board2raw(board)
+    state = parser.parse(new_raw)
 
     assert len(state.changed) == 2
     assert state.move == chess.Move.from_uci("e2e4")
 
     parser.accept_state(state)
-    state = parser.parse(raw_board)
-    assert len(state.changed) == 0
+    state = parser.parse(new_raw)
+    assert state.changed == []
     assert state.move is None
 
 
@@ -102,21 +67,8 @@ def test_board_parser_accept_state():
     board = chess.Board()
     parser = BoardParser(board)
 
-    raw_board = tuple(square.state.value for square in parser._previous_state)
-    state = parser.parse(raw_board)
+    raw_state = parser._previous_state
+    state = parser.parse(raw_state)
 
     parser.accept_state(state)
     assert parser._previous_state == state.board
-
-
-def test_seen_counter():
-    inital = (0,)
-    new = (1,)
-    seen_counter = SeenCounter(inital, 3)
-    assert not seen_counter.has_been_seen_n_times(inital)
-    assert not seen_counter.has_been_seen_n_times(inital)
-    assert seen_counter.has_been_seen_n_times(inital)
-
-    assert not seen_counter.has_been_seen_n_times(new)
-    assert not seen_counter.has_been_seen_n_times(new)
-    assert seen_counter.has_been_seen_n_times(new)
