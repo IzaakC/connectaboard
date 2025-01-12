@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "connectaboard"
+version = "0.1.0"
+description = "Connectable chess board."
+authors = ["Izaak Cornelis <cornelisizaak@gmail.com>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyserial = "^3.5"
+chess = "^1.11.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.6"
+mypy = "^1.14.1"
+ipykernel = "^6.29.5"
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
