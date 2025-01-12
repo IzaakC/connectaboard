@@ -1,23 +1,27 @@
 from time import sleep
 
 import chess
+import serial
 
 from connectaboard import BoardController, BoardParser
 
 
 def main():
     board = chess.Board()
-    controller = BoardController("/dev/ttyUSB0")
+    ser = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.5)
+    controller = BoardController(ser)
     parser = BoardParser(board)
+    previous_raw = parser._previous_state
 
     while True:
         raw_board = controller.receive_board()
-        state = parser.parse(raw_board)
 
-        if state.changed:
-            controller.turn_on_leds(
-                [change.square for change in state.changed], pulse=False
-            )
+        if raw_board == previous_raw:
+            sleep(0.1)
+            continue
+        previous_raw = raw_board
+
+        state = parser.parse(raw_board)
 
         if state.move is not None:
             if board.is_legal(state.move):
@@ -28,10 +32,10 @@ def main():
                 print(board)
 
             else:
-                print("Illegal move!")
+                print(f"Illegal move!: {state.move.uci()}")
                 controller.show_move(state.move, pulse=True)
 
-        sleep(0.1)
+        sleep(0.2)
 
 
 if __name__ == "__main__":
