@@ -6,13 +6,12 @@ from connectaboard.board_parser import (
     WHITE,
     BoardParser,
     SquareChange,
-    _board2raw,
 )
 
 
 def test_board2raw():
     board = chess.Board()
-    raw = _board2raw(board)
+    raw = BoardParser.board2raw(board)
     assert raw[chess.A1] == WHITE
     assert raw[chess.E4] == EMPTY
     assert raw[chess.H8] == BLACK
@@ -29,7 +28,7 @@ def test_board_parser_initial_state():
     board = chess.Board()
     parser = BoardParser(board)
     raw_state = parser._previous_state
-    expected_state = _board2raw(board)
+    expected_state = BoardParser.board2raw(board)
 
     assert raw_state == expected_state
     assert len(raw_state) == 64
@@ -51,7 +50,7 @@ def test_board_parser_parse_with_move():
 
     # Simulate a move: e2 to e4
     board.push(chess.Move.from_uci("e2e4"))
-    new_raw = _board2raw(board)
+    new_raw = BoardParser.board2raw(board)
     state = parser.parse(new_raw)
 
     assert len(state.changed) == 2
