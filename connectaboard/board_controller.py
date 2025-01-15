@@ -40,3 +40,8 @@ class BoardController:
         msg = [config if s in squares else 0 for s in chess.SQUARES]
         self.comms.write(_SHOW_LEDS)
         self.comms.write(bytes(msg))
+
+    def clear_leds(self) -> None:
+        msg = [0 for _ in chess.SQUARES]
+        self.comms.write(_SHOW_LEDS)
+        self.comms.write(bytes(msg))
