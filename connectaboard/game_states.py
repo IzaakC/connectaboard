@@ -31,10 +31,10 @@ class PlayersTurn(GameState):
             print("castling!")
             context.push_move(move)
             rook_move = more_chess.get_rook_move_for_castling(move)
-            return WaitForMove(rook_move, ComputersTurn(), indicate=False, push=False)
+            return WaitForMove(rook_move, FoesTurn(), indicate=False, push=False)
 
         context.push_move(move)
-        return ComputersTurn()
+        return FoesTurn()
 
 
 @dataclass
@@ -105,14 +105,9 @@ class Recovery(GameState):
 
 
 @dataclass
-class ComputersTurn(GameState):
+class FoesTurn(GameState):
     def execute(self, context: Context) -> GameState:
-        result = context.engine.play(context.board, chess.engine.Limit(time=0.1))
-        move = result.move
-
-        if not move:
-            raise RuntimeError("No move..")
-
+        move = context.foe.play(context.board)
         print(f"computer playes {move}")
         if context.board.is_castling(move):
             rook_move = more_chess.get_rook_move_for_castling(move)

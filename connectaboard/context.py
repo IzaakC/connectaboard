@@ -6,6 +6,7 @@ import chess.engine
 
 from connectaboard.board_controller import BoardController
 from connectaboard.board_parser import BoardParser
+from connectaboard.foes import Foe
 from connectaboard.helpers import SeenCounter
 
 SLEEP_TIME = 0.1
@@ -17,7 +18,7 @@ class Context:
     controller: BoardController
     parser: BoardParser
     board: chess.Board
-    engine: chess.engine.SimpleEngine
+    foe: Foe
 
     def board_state_is_valid(self) -> bool:
         raw_board = self.controller.receive_board()
