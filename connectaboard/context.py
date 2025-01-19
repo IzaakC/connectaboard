@@ -6,11 +6,9 @@ import chess.engine
 
 from connectaboard.board_controller import BoardController
 from connectaboard.board_parser import BoardParser
+from connectaboard.config import SEEN_EXACTLY_N_TIMES, SLEEP_TIME
 from connectaboard.foes import Foe
 from connectaboard.helpers import SeenCounter
-
-SLEEP_TIME = 0.1
-SEEN_EXACTLY_N_TIMES = 3
 
 
 @dataclass
@@ -27,7 +25,7 @@ class Context:
     def wait_for_changes(self) -> BoardParser.State:
         """Waits for changes in the board.
         Only returns when the state has changed and has been seen at least SEEN_EXACTLY_N_TIMES times in succession."""
-        seen_counter = SeenCounter[bytes](2)
+        seen_counter = SeenCounter[bytes](SEEN_EXACTLY_N_TIMES)
         while True:
             raw_board = self.controller.receive_board()
             state = self.parser.parse(raw_board)
