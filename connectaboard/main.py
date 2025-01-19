@@ -1,41 +1,29 @@
-from time import sleep
-
 import chess
+import chess.engine
 import serial
 
-from connectaboard import BoardController, BoardParser
+from connectaboard import (
+    BoardController,
+    BoardParser,
+    Context,
+    game_states,
+)
+from connectaboard.config import BAUD_RATE, PATH_TO_ENGINE, USB_PORT
 
 
 def main():
     board = chess.Board()
-    ser = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.5)
+    ser = serial.Serial(USB_PORT, BAUD_RATE, timeout=0.5)
     controller = BoardController(ser)
     parser = BoardParser(board)
-    previous_raw = parser._previous_state
+    state = game_states.PlayersTurn()
 
-    while True:
-        raw_board = controller.receive_board()
+    with chess.engine.SimpleEngine.popen_uci(PATH_TO_ENGINE) as engine:
+        conntectaboard = Context(controller, parser, board, engine)
 
-        if raw_board == previous_raw:
-            sleep(0.1)
-            continue
-        previous_raw = raw_board
-
-        state = parser.parse(raw_board)
-
-        if state.move is not None:
-            if board.is_legal(state.move):
-                parser.accept_state(state)
-                board.push(state.move)
-                controller.show_move(state.move, pulse=False)
-                print(state.move)
-                print(board)
-
-            else:
-                print(f"Illegal move!: {state.move.uci()}")
-                controller.show_move(state.move, pulse=True)
-
-        sleep(0.2)
+        while not board.is_game_over():
+            print(state)
+            state = state.execute(conntectaboard)
 
 
 if __name__ == "__main__":

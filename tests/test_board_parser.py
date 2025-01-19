@@ -56,7 +56,7 @@ def test_board_parser_parse_with_move():
     assert len(state.changed) == 2
     assert state.move == chess.Move.from_uci("e2e4")
 
-    parser.accept_state(state)
+    parser.accept_pending_state()
     state = parser.parse(new_raw)
     assert state.changed == []
     assert state.move is None
@@ -69,5 +69,5 @@ def test_board_parser_accept_state():
     raw_state = parser._previous_state
     state = parser.parse(raw_state)
 
-    parser.accept_state(state)
+    parser.accept_pending_state()
     assert parser._previous_state == state.board

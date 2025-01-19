@@ -16,6 +16,7 @@ class SupportsReadWrite(Protocol):
 class BoardController:
     comms: SupportsReadWrite
     _brightness: int = 7
+    _last_led_cmd: list[int] = []
 
     def set_brightness(self, value: int):
         if 0 <= value <= 7:
@@ -38,10 +39,11 @@ class BoardController:
     def turn_on_leds(self, squares: list[chess.Square], pulse: bool) -> None:
         config = self._brightness | pulse * _PULSE_FLAG | _ON_FLAG
         msg = [config if s in squares else 0 for s in chess.SQUARES]
-        self.comms.write(_SHOW_LEDS)
-        self.comms.write(bytes(msg))
+
+        if self._last_led_cmd != msg:
+            self.comms.write(_SHOW_LEDS)
+            self.comms.write(bytes(msg))
+            self._last_led_cmd = msg
 
     def clear_leds(self) -> None:
-        msg = [0 for _ in chess.SQUARES]
-        self.comms.write(_SHOW_LEDS)
-        self.comms.write(bytes(msg))
+        self.turn_on_leds([], False)
