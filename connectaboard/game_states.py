@@ -31,10 +31,10 @@ class PlayersTurn(GameState):
             print("castling!")
             context.push_move(move)
             rook_move = more_chess.get_rook_move_for_castling(move)
-            return WaitForMove(rook_move, FoesTurn(), indicate=False, push=False)
+            return WaitForMove(rook_move, OppenentsTurn(), indicate=False, push=False)
 
         context.push_move(move)
-        return FoesTurn()
+        return OppenentsTurn()
 
 
 @dataclass
@@ -79,11 +79,8 @@ class Recovery(GameState):
             raw_board = context.controller.receive_board()
             if self.indicate_fixes_and_check(raw_board, context):
                 context.controller.clear_leds()
-                break
+                return self.next_state
             sleep(config.SLEEP_TIME)
-
-        assert context.board_state_is_valid()
-        return self.next_state
 
     def indicate_fixes_and_check(self, raw_board: bytes, context: Context) -> bool:
         need_to_be_removed = context.parser.detect_pieces_that_should_not_be_there(
@@ -105,9 +102,9 @@ class Recovery(GameState):
 
 
 @dataclass
-class FoesTurn(GameState):
+class OppenentsTurn(GameState):
     def execute(self, context: Context) -> GameState:
-        move = context.foe.play(context.board)
+        move = context.opponent.play(context.board)
         print(f"computer playes {move}")
         if context.board.is_castling(move):
             rook_move = more_chess.get_rook_move_for_castling(move)

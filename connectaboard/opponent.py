@@ -5,19 +5,19 @@ import chess
 import chess.engine
 
 
-class Foe(ABC):
+class Opponent(ABC):
     @abstractmethod
     def play(self, board: chess.Board) -> chess.Move:
         pass
 
 
 @dataclass
-class Engine(Foe):
+class Engine(Opponent):
     engine: chess.engine.SimpleEngine
-    time_limit: float
+    limit: chess.engine.Limit
 
     def play(self, board: chess.Board) -> chess.Move:
-        result = self.engine.play(board, chess.engine.Limit(self.time_limit))
+        result = self.engine.play(board, self.limit)
         move = result.move
 
         if not move:
@@ -26,7 +26,7 @@ class Engine(Foe):
         return move
 
 
-class ChessDotComPlayer(Foe):
+class ChessDotComPlayer(Opponent):
     def play(self, board: chess.Board) -> chess.Move:
         player_move = board.move_stack[-1]
         raise NotImplementedError()

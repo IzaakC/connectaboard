@@ -7,8 +7,8 @@ import chess.engine
 from connectaboard.board_controller import BoardController
 from connectaboard.board_parser import BoardParser
 from connectaboard.config import SEEN_EXACTLY_N_TIMES, SLEEP_TIME
-from connectaboard.foes import Foe
 from connectaboard.helpers import SeenCounter
+from connectaboard.opponent import Opponent
 
 
 @dataclass
@@ -16,7 +16,7 @@ class Context:
     controller: BoardController
     parser: BoardParser
     board: chess.Board
-    foe: Foe
+    opponent: Opponent
 
     def board_state_is_valid(self) -> bool:
         raw_board = self.controller.receive_board()

@@ -2,8 +2,8 @@ import chess
 import chess.engine
 import serial
 
-from connectaboard import BoardController, BoardParser, Context, foes, game_states
-from connectaboard.config import BAUD_RATE, PATH_TO_ENGINE, USB_PORT
+from connectaboard import BoardController, BoardParser, Context, game_states, opponent
+from connectaboard.config import BAUD_RATE, LIMIT, PATH_TO_ENGINE, USB_PORT
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     state = game_states.PlayersTurn()
 
     with chess.engine.SimpleEngine.popen_uci(PATH_TO_ENGINE) as engine:
-        foe = foes.Engine(engine, 0.1)
+        foe = opponent.Engine(engine, LIMIT)
         conntectaboard = Context(controller, parser, board, foe)
 
         while not board.is_game_over():
