@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from time import sleep
 
 import chess
@@ -8,7 +8,7 @@ from connectaboard.board_controller import BoardController
 from connectaboard.board_parser import BoardParser
 from connectaboard.config import SEEN_EXACTLY_N_TIMES, SLEEP_TIME
 from connectaboard.helpers import SeenCounter
-from connectaboard.opponent import Opponent
+from connectaboard.opponents import Opponent
 
 
 @dataclass
@@ -17,6 +17,7 @@ class Context:
     parser: BoardParser
     board: chess.Board
     opponent: Opponent
+    promoted_pieces: set[chess.Square] = field(default_factory=set)
 
     def board_state_is_valid(self) -> bool:
         raw_board = self.controller.receive_board()
@@ -49,5 +50,20 @@ class Context:
             sleep(SLEEP_TIME)
 
     def push_move(self, move: chess.Move) -> None:
+        self._push_promotion(move)
         self.board.push(move)
         self.parser.accept_pending_state()
+
+    def _push_promotion(self, move):
+        # any piece takes, remove promoted piece
+        if move.to_square in self.promoted_pieces:
+            self.promoted_pieces.remove(move.to_square)
+
+        # move by promoted piece, update position
+        if move.from_square in self.promoted_pieces:
+            self.promoted_pieces.remove(move.from_square)
+            self.promoted_pieces.add(move.to_square)
+
+        # new promoted piece
+        if move.promotion is not None:
+            self.promoted_pieces.add(move.to_square)

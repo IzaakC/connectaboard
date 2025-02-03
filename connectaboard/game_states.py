@@ -17,7 +17,7 @@ class GameState(ABC):
 @dataclass
 class PlayersTurn(GameState):
     def execute(self, context: Context) -> GameState:
-        context.controller.clear_leds()
+        context.controller.turn_on_leds(context.promoted_pieces, pulse=False)
         move = context.wait_for_move()
         if move is None:
             return Recovery(self, "Too many changes!")
@@ -33,7 +33,17 @@ class PlayersTurn(GameState):
             rook_move = more_chess.get_rook_move_for_castling(move)
             return WaitForMove(rook_move, OppenentsTurn(), indicate=False, push=False)
 
+        if more_chess.is_en_passant(move, context.board):
+            context.push_move(move)
+            return Recovery(
+                OppenentsTurn(), "Check if enpassant capture piece is removed"
+            )
+
+        if more_chess.is_promotable(move, context.board):
+            move.promotion = chess.QUEEN
+
         context.push_move(move)
+
         return OppenentsTurn()
 
 
@@ -54,7 +64,9 @@ class WaitForMove(GameState):
 
         if played_move is None:
             return Recovery(self, "Too many changes!")
-        if played_move != expected_move:
+
+        # compare move, disregarding promotion.
+        if not more_chess.have_same_from_and_to_square(played_move, expected_move):
             msg = f"Not the right move! {played_move = }, {expected_move = }"
             return Recovery(self, msg)
 
@@ -109,4 +121,11 @@ class OppenentsTurn(GameState):
         if context.board.is_castling(move):
             rook_move = more_chess.get_rook_move_for_castling(move)
             return WaitForMove(move, WaitForMove(rook_move, PlayersTurn(), push=False))
+
+        if more_chess.is_en_passant(move, context.board):
+            return WaitForMove(
+                move,
+                Recovery(PlayersTurn(), "Check if en passant capture is removed."),
+            )
+
         return WaitForMove(move, PlayersTurn())
