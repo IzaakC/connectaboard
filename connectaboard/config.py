@@ -1,6 +1,9 @@
 import os
 
 import chess.engine
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SLEEP_TIME = 0.1
 STOCKFISH_ENGINE = os.environ["STOCKFISH"]
