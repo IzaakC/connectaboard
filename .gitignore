@@ -3,3 +3,4 @@ dist
 poetry.lock
 .pytest_cache
 stockfish*
+.env

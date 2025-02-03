@@ -3,7 +3,7 @@ import chess.engine
 import serial
 
 from connectaboard import BoardController, BoardParser, Context, game_states, opponents
-from connectaboard.config import BAUD_RATE, LIMIT, PATH_TO_ENGINE, USB_PORT
+from connectaboard.config import BAUD_RATE, LIMIT, STOCKFISH_ENGINE, USB_PORT
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     parser = BoardParser(board)
     state = game_states.PlayersTurn()
 
-    with chess.engine.SimpleEngine.popen_uci(PATH_TO_ENGINE) as engine:
+    with chess.engine.SimpleEngine.popen_uci(STOCKFISH_ENGINE) as engine:
         opponent = opponents.Engine(engine, LIMIT)
         conntectaboard = Context(controller, parser, board, opponent)
 
