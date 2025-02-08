@@ -3,11 +3,9 @@ Description=Connectaboard update service
 After=network.target
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/bin/bash /home/connectaboard/connectaboard/services/update.sh
 WorkingDirectory=/home/connectaboard/connectaboard
-Restart=always
-RestartSec=5
 User=connectaboard
 StandardOutput=append:/var/log/connectaboard_update.log
 StandardError=append:/var/log/connectaboard_update.err
