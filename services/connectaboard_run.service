@@ -4,7 +4,7 @@ After=connectaboard_update.service
 
 [Service]
 Type=simple
-ExecStart=home/connectaboard/.local/bin/poetry run python connectaboard/main.py
+ExecStart=/home/connectaboard/.local/bin/poetry run python connectaboard/main.py
 WorkingDirectory=/home/connectaboard/connectaboard
 Restart=always
 RestartSec=5

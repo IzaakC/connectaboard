@@ -4,8 +4,10 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /home/connectaboard/connectaboard/services/update.sh
 WorkingDirectory=/home/connectaboard/connectaboard
+ExecStart=/usr/bin/git pull
+ExecStart=/home/connectaboard/.local/bin/poetry lock --no-update
+ExecStart=/home/connectaboard/.local/bin/poetry install --no-root
 User=connectaboard
 StandardOutput=append:/var/log/connectaboard_update.log
 StandardError=append:/var/log/connectaboard_update.err
