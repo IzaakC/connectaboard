@@ -1,0 +1,17 @@
+[Unit]
+Description=Connectaboard update service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /home/connectaboard/connectaboard/services/update.sh
+WorkingDirectory=/home/connectaboard/connectaboard
+Restart=always
+RestartSec=5
+User=connectaboard
+StandardOutput=append:/var/log/connectaboard_update.log
+StandardError=append:/var/log/connectaboard_update.err
+RemainAfterExit=no 
+
+[Install]
+WantedBy=multi-user.target
