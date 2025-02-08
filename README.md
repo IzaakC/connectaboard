@@ -1,0 +1,1 @@
+ssh connectaboard@connectaboard.local
